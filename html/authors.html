@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+
+    <title>Authors</title>
+    <!-- Bootstrap Core CSS -->
+
+ <link rel="import" href="includes.html">
+</head>
+
+
+<body>
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links">
+		
+            <a class="navbar-brand" href="authors.html">Home</a>
+            <a class="navbar-brand" href="about.html">About</a>
+
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+
+                        <li>
+                            <a href="#"><i class="fa fa-filter fa-fw"></i> Filter <span class="fa arrow"></span></a>
+
+                            <ul class="nav nav-second-level" id="chk_filters"> 
+                                <!-- Filter sections and checkboxes inserted here by JavaScipt -->
+                            </ul> 
+
+                            <!-- /.nav-second-level -->
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header"> Pubs Author List </h1>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+            <!-- /.row -->
+
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Authors
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="author-table">
+                                <thead>
+                                    <tr>
+
+                                        <th>ID</th> 
+                                        <th>Name</th> <!-- soc - should be searchable and not visible -->
+                                        <th>Action</th> <!-- major code - for lookup later -->
+                                        
+                                    </tr>
+                                </thead>
+                               
+                            </table>
+                            <!-- /.table-responsive -->
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+
+
+    <!-- /#wrapper -->
+    <!-- jQuery -->
+
+<script>
+    function edit_author(edit_button)
+    {	
+            var authorID = $(edit_button).closest('tr').prop('id'); 
+
+            // get authors
+            $.ajax({
+            statusCode: {
+                404: function(){ alert("Authors not found"); }
+            },
+            async: true,
+            method:"POST",
+            cache: false,
+            url: "process_req.php",
+            data: { request:"set_au_key", au_id : authorID},
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert(errorThrown); 
+            },
+                success: function(data) { window.location = "editAuthor.html"; }
+            }); // end ajax 
+    }
+
+    function delete_author(delete_button)
+    {
+        var authorID = $(delete_button).closest('tr').prop('id'); 
+    }
+
+    function build_table(_data)
+    {
+        $('#author-table').DataTable({
+            responsive: {responsiveR: true, details: false}, // must hide details, or hidden columns become child rows
+            data: $.parseJSON(_data), 
+            rowId: 'au_id', // can get au_id later when edit or delete button is pressed
+            createdRow: function(row, data, index)
+            {
+                
+            }, 
+            columns: [
+                {data : "au_id"}, 
+                {data: "au_fname"},
+            {data: null,
+            createdCell: function(td, cellData, rowData, row, col){
+                //alert(rowData['au_id']); 
+                $(td).html('<button onclick="edit_author(this)">Edit</button><button onclick="delete_author(this)">Delete</button>'); 
+            }
+    }
+            ]
+        });
+    }
+
+    $(document).ready(function(){
+            
+        // get authors
+        $.ajax({
+            statusCode: {
+                404: function(){ alert("Authors not found"); }
+            },
+            async: true,
+            method:"GET",
+            cache: false,
+            url: "/authors",
+            // data: { request:"get_authors"},
+            error: function(jqXHR, textStatus, errorThrown)
+            {
+                alert(errorThrown); 
+            },
+            success: function(data) {
+                console.log(data);
+                build_table(data);
+            }
+        }); // end ajax 
+
+    }); // end ready 
+  </script>
+
+</body>
+
+</html>
